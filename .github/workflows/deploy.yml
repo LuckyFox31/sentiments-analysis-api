@@ -23,3 +23,4 @@ jobs:
         with:
           git_remote_url: 'ssh://dokku@147.93.55.52:22/sentiments-api'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          branch: 'main'
