@@ -3,11 +3,14 @@ name: 'deploy'
 
 on:
   push:
-    branches:
-      - master
+    branches: [main]
 
 jobs:
+  run-tests:
+    uses: ./.github/workflows/api-tests.yml
+
   deploy:
+    needs: run-tests
     runs-on: ubuntu-24.04
     steps:
       - name: Cloning repo
