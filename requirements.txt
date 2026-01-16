@@ -5,4 +5,4 @@ python-dotenv==1.0.1
 nltk==3.9.1
 scikit-learn==1.6.0
 numpy==1.26.4
-brevo-python==7.0.0
+brevo-python==1.2.0
