@@ -4,7 +4,7 @@ import tempfile
 import os
 from pathlib import Path
 from unittest.mock import Mock, patch
-import tensorflow as tf
+import numpy as np
 
 # Path racine du projet
 BASE_DIR = Path(__file__).parent.parent
@@ -30,18 +30,19 @@ def in_memory_db():
 
 @pytest.fixture
 def mock_model():
-    """Modèle TensorFlow mock pour les tests."""
+    """Modèle scikit-learn Naive Bayes mock pour les tests."""
     model = Mock()
-    model.predict = Mock(return_value=tf.constant([[0.75]]))
+    model.predict = Mock(return_value=np.array([1]))  # 1 = positif
+    model.predict_proba = Mock(return_value=np.array([[0.25, 0.75]]))  # [négatif, positif]
     return model
 
 
 @pytest.fixture
-def mock_tokenizer():
-    """Tokenizer mock pour les tests."""
-    tokenizer = Mock()
-    tokenizer.texts_to_sequences = Mock(return_value=[[1, 2, 3]])
-    return tokenizer
+def mock_vectorizer():
+    """Vectorizer TF-IDF mock pour les tests."""
+    vectorizer = Mock()
+    vectorizer.transform = Mock(return_value=Mock())
+    return vectorizer
 
 
 @pytest.fixture
