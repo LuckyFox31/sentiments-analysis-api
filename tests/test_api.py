@@ -11,18 +11,18 @@ class TestAPIEndpoints:
     """Tests des endpoints API."""
 
     @pytest.fixture
-    def client(self, mock_model, mock_tokenizer):
+    def client(self, mock_model, mock_vectorizer):
         """Client de test FastAPI."""
         # Importer l'API et patcher les globals directement
         import api
 
         # Sauvegarder les valeurs originales
         original_model = api.model
-        original_tokenizer = api.tokenizer
+        original_vectorizer = api.vectorizer
 
         # Remplacer par les mocks
         api.model = mock_model
-        api.tokenizer = mock_tokenizer
+        api.vectorizer = mock_vectorizer
 
         # Créer le client
         test_client = TestClient(api.app)
@@ -31,7 +31,7 @@ class TestAPIEndpoints:
 
         # Restaurer les valeurs originales
         api.model = original_model
-        api.tokenizer = original_tokenizer
+        api.vectorizer = original_vectorizer
 
     def test_root_endpoint(self, client):
         """Test l'endpoint racine."""
@@ -83,24 +83,24 @@ class TestAPIEndpoints:
 
         assert response.status_code == 400
 
-    def test_predict_model_not_loaded(self, mock_model, mock_tokenizer):
+    def test_predict_model_not_loaded(self, mock_model, mock_vectorizer):
         """Test quand le modèle n'est pas chargé."""
         import api
 
         # Sauvegarder les valeurs originales
         original_model = api.model
-        original_tokenizer = api.tokenizer
+        original_vectorizer = api.vectorizer
 
         # Simuler modèle non chargé
         api.model = None
-        api.tokenizer = None
+        api.vectorizer = None
 
         test_client = TestClient(api.app)
         response = test_client.post("/predict", json={"text": "test"})
 
         # Restaurer les valeurs originales
         api.model = original_model
-        api.tokenizer = original_tokenizer
+        api.vectorizer = original_vectorizer
 
         assert response.status_code == 503
         assert "modèle" in response.json()["detail"].lower()
@@ -121,12 +121,12 @@ class TestReportBadPredictionEndpoint:
     """Tests de l'endpoint de signalement."""
 
     @pytest.fixture
-    def client_with_db(self, temp_db_path, mock_model, mock_tokenizer, monkeypatch):
+    def client_with_db(self, temp_db_path, mock_model, mock_vectorizer, monkeypatch):
         """Client avec base de données temporaire."""
         monkeypatch.setattr("database.DB_PATH", temp_db_path)
 
         with patch('api.model', mock_model), \
-             patch('api.tokenizer', mock_tokenizer):
+             patch('api.vectorizer', mock_vectorizer):
             from database import init_database
             init_database()
             from api import app
@@ -187,7 +187,7 @@ class TestReportBadPredictionEndpoint:
         # Le 3ème doit déclencher un email
         mock_send_email.assert_called_once()
 
-    def test_report_bad_prediction_email_fails(self, temp_db_path, mock_model, mock_tokenizer, monkeypatch):
+    def test_report_bad_prediction_email_fails(self, temp_db_path, mock_model, mock_vectorizer, monkeypatch):
         """Test quand l'envoi d'email échoue."""
         import api
         from database import init_database
@@ -197,11 +197,11 @@ class TestReportBadPredictionEndpoint:
 
         # Sauvegarder les valeurs originales
         original_model = api.model
-        original_tokenizer = api.tokenizer
+        original_vectorizer = api.vectorizer
 
         # Remplacer par les mocks
         api.model = mock_model
-        api.tokenizer = mock_tokenizer
+        api.vectorizer = mock_vectorizer
 
         # Initialiser la base de données
         init_database()
@@ -226,4 +226,4 @@ class TestReportBadPredictionEndpoint:
 
         # Restaurer les valeurs originales
         api.model = original_model
-        api.tokenizer = original_tokenizer
+        api.vectorizer = original_vectorizer
